@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     DATABASE_PORT = config("DATABASE_PORT", default="5432")
     DATABASE_HOSTNAME = config("DATABASE_HOSTNAME")
     DATABASE_CREDENTIALS = config("DATABASE_CREDENTIALS")
-    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2//:postgres:workflow@postgres5432/worflow"
+    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2//:postgres:workflow@postgres5432/workflow"
 
 
 @lru_cache()

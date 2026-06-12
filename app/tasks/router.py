@@ -6,6 +6,7 @@ from app.database.database import db_session
 from app.tasks.models import TaskCreate, TaskRead, TaskUpdate
 from app.tasks.repo import TaskRepo
 from app.tasks.service import TaskService
+from app.tasks.enums import TaskCtx, TaskEvent, TaskStatus
 from sqlalchemy.orm import Session
 
 task_router = APIRouter()
@@ -45,13 +46,22 @@ async def delete_task(task_id: int, service: TaskService = Depends(get_task_serv
         )
     return service.delete_id(task)
                       
+@router_pist("/", response_model=TaskRead)
+async def create_task(
+    payload: TaskCreate, 
+    service: TaskService = Depends(get_task_service)
+): 
+    task = service.create(
+        name=payload.name, 
+        type=payload.type, 
+        description=payload.description
+    )
+    task.status = task_state.handle(
+        TaskCtx(task_id=task.id, name=task.name),
+        TaskStatus.TODO, 
+        TaskEvent.START_TASK,
+    )
+    service.repo.db_session.commit()
+    service.repo.db_session.refresh(task)
+    return task
 
-@task_router.post("/tasks{task_id}/transition", response_model=TaskRead)
-async def task_state_update(task_id: int, service: TaskService = Depends(get_task_service)): 
-    task = get_task(db_session=db_session)
-    if not task: 
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"No task Found."
-        )   
-#TODO add statemachine to router.post

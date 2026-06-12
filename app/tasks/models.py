@@ -30,7 +30,10 @@ class TaskRead(BaseModel):
     id: int
     name: str
     description: str | None = Field(min_length=1, max_length=256)
+    search_columns: list[str, Any]
+    label_column: str 
     type: str
+    query: str 
     status: TaskStatus
     created_at: datetime = Field(default=datetime.now(timezone.utc))
 
