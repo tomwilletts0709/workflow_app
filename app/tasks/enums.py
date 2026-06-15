@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import StrEnum, auto
+from enum import StrEnum, auto, Enum
 
 from app.tasks.flows import StateMachine
 
@@ -30,7 +30,7 @@ class TaskCtx:
 task_state: StateMachine[TaskStatus, TaskEvent, TaskCtx] = StateMachine()
 
 @task_state.transition(TaskStatus.TODO, TaskEvent.START_TASK, TaskStatus.IN_PROGRESS)
-def begin_tasl(ctx: TaskCtx) -> str: 
+def begin_task(ctx: TaskCtx) -> str: 
     return f"Task {ctx.task_id} started: {ctx.name}"
 
 @task_state.transition(

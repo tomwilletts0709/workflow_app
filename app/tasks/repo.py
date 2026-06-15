@@ -1,50 +1,54 @@
 from typing import Protocol
 
 from sqlalchemy.orm import Session
-from sqlalchemy import select, or_
+from sqlalchemy import select
 
-from app.database.service import db_session
 from app.tasks.enums import TaskStatus
 from app.tasks.models import Task
 from app.core.logging import logging
+from app.search.repo import SearchRepo
 
 logging = logging.getLogger(__name__)
 
 
-class TasksRepoProtocol(Protocol): 
-    def create(self, name: str, type: str, description: str | None) -> Tasks: 
+class TaskRepoProtocol(Protocol): 
+    def create(self, name: str, project_id: int | None, type: str, description: str | None) -> Task: 
         ...
 
-    def get_id(self, task_id: int, name: str, description: str | None, type: str, status: TaskStatus)->Tasks: 
+    def get_id(self, task_id: int)->Task | None: 
+        ...
+
+    def get_name(self, name: str) -> Task | None: 
+        ...
+
+    def update(self, task_id: int, name: str | None, description: str | None) -> Task | None: 
         ...
     
-    def get_all(self, task_id: int, name: str, description: str | None, type: str, status: TaskStatus) -> Tasks: 
-        ...
-
-    def get_name(self, task_id: int, name: str) -> Tasks: 
-        ...
-
-    def update(self, name:str, description: str | None, type: str, status: TaskStatus)->Tasks:
+    def delete_id(self, task_id: int) -> bool: 
         ...
     
-    def delete_id(self, task_id: int) -> None: 
-        ...
-    
-    def delete_name(self, name: str) -> None: 
-        ...
 
-    def list_all(self) -> list[Tasks]: 
+    def list_all(self) -> list[Task]: 
         ... 
 
+    def search_tasks(self, query: str | None, page: int, page_size: int) -> dict:
+        ...
 
+    def autocomplete_search(self, query: str, limit: int = 10) -> list[str]:
+        ...
+
+    def update_status(self, task_id: int, status: TaskStatus) -> Task | None: 
+        ...
 
 class TaskRepo: 
     def __init__(self, db_session: Session):
         self.db_session = db_session
+        self.search_repo = SearchRepo(db_session)
 
-    def create(self, name: str, type: str, description: str | None) -> Tasks: 
+    def create(self, name: str, project_id: int | None, type: str, description: str | None) -> Task: 
         task = Task(
             name=name,
+            project_id=project_id,
             type=type,
             description=description,
             status=TaskStatus.TODO,
@@ -54,41 +58,72 @@ class TaskRepo:
         self.db_session.refresh(task)
         return task
 
-    def get_id(self, task_id: int, name: str, description: str | None, status: TaskStatus) -> Tasks: 
+    def get_id(self, task_id: int) -> Task | None: 
         return self.db_session.query(Task).filter(Task.id == task_id).one_or_none()
 
-    def get_all(self, task_id: int, name: str, descriptions: str | None, type: str, status: TaskStatus) -> Tasks: 
-        return self.db_session.query(Task).filter(Task.id == task_ud)
-    
-    def get_name(self, task_id: int, name: str) -> Tasks | None:
+    def get_name(self, name: str) -> Task | None:
         return self.db_session.query(Task).filter(Task.name == name).one_or_none()
 
     
-    def update(self, name: str, description: str | None, status: TaskStatus) -> Tasks: 
+    def update(self, task_id: int, name: str | None, description: str | None) -> Task | None: 
         statement = select(Task).where(Task.id == task_id)
-        result = self.db_session.execute(statement).scalar_one_or_none()
+        task = self.db_session.execute(statement).scalar_one_or_none()
 
-        if statement is None: 
-            raise ValueError(f"Cannot Update Task")
+        if task is None: 
+            return None
 
-        result.name = name
-        result.description = description
-        result.status = status
+        if name is not None: 
+            task.name = name
 
+        if description is not None: 
+            task.description = description
+       
+       
         self.db_session.commit()
-        self.db_session.refresh(result)
-        return result
+        self.db_session.refresh(task)
+        return task
     
-    def delete_id(self, task_id: str) -> None: 
-        task = self.db_session.query(Task).filter(Task.id == task_id).one()
+    def delete_id(self, task_id: int) -> bool: 
+        task = self.db_session.query(Task).filter(Task.id == task_id).one_or_none()
+
+        if task is None: 
+            return False
+
         self.db_session.delete(task)
         self.db_session.commit()
+        return True
 
-    def delete_name(self, name: str) -> None: 
-        task = self.db_session.query(Task).filter(Task.name == name).one()
-        self.db_session.delete(task)
-        self.db_sessionl.commit()
-
-    def list_all(self) -> list[Tasks]: 
+    def list_all(self) -> list[Task]: 
         return self.db_session.query(Task).all()
     
+    def search_tasks(self, query: str | None, page: int, page_size: int) -> dict: 
+        return self.search_repo.text_search(
+            Task, 
+            [Task.name, Task.description], 
+            query, 
+            None, 
+            page, 
+            page_size
+        )
+        
+    def autocomplete_search(self, query: str, limit: int = 10) -> list[str]: 
+        return self.search_repo.autocomplete(
+            Task, 
+            [Task.name, Task.description],
+            Task.name, 
+            query, 
+            limit
+        )
+    
+    def update_status(self, task_id: int, status: TaskStatus) -> Task | None: 
+        statement = select(Task).where(Task.id == task_id)
+        task = self.db_session.execute(statement).scalar_one_or_none()
+
+        if task is None: 
+            return None
+        
+        task.status = status
+
+        self.db_session.commit()
+        self.db_session.refresh(task)
+        return task

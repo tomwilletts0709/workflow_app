@@ -1,30 +1,26 @@
 
+import logging
 from functools import lru_cache
 
-import logging
-from starlette.config import Config
-from pydantic_settings import SettingsConfigDict, BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 log = logging.getLogger(__name__)
-config = Config(".env")
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-    ENV: str = "development"
-    DB_URL: str
-    app_name: str = "Document Processor"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
-    #Logging
-    LOG_LEVEL = config("LOG_LEVEL", default=logging.WARNING)
-
-    #Database
-    DATABASE_NAME = config("DATABASE_NAME", default='workflow')
-    DATABASE_PORT = config("DATABASE_PORT", default="5432")
-    DATABASE_HOSTNAME = config("DATABASE_HOSTNAME")
-    DATABASE_CREDENTIALS = config("DATABASE_CREDENTIALS")
-    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2//:postgres:workflow@postgres5432/workflow"
+    environment: str = Field(default="development", validation_alias="ENV")
+    database_url: str = Field(validation_alias="DATABASE_URL")
+    app_name: str = "Workflow"
+    log_level: str = Field(default="WARNING", validation_alias="LOG_LEVEL")
 
 
 @lru_cache()
-def get_settings() -> "Settings":
+def get_settings() -> Settings:
     return Settings()

@@ -6,7 +6,7 @@ S = TypeVar("S", bound=Enum)
 E = TypeVar("E", bound=Enum)
 C = TypeVar("C")
 
-Action = Callable[[C], None]
+Action = Callable[[C], str]
 
 @dataclass 
 class StateMachine(Generic[S, E , C]):
@@ -25,7 +25,7 @@ class StateMachine(Generic[S, E , C]):
         return next_state
     
     def transition(self, from_state: S, event: E, to_state: S) -> S | Iterable[S]:
-        from_states = tuple(from_state) if isinstance(from_state, Iterable) else (from_state,)
+        from_states = tuple(from_state) if isinstance(from_state, (tuple,list,set)) else (from_state,)
 
         def decorator(func: Action[C])-> Action[C]:
             for state in from_states:

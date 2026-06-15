@@ -1,10 +1,11 @@
 from collections.abc import Generator
-from typing import Annotated
 import re
+from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import create_engine, Text, MetaData
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker, declared_attr
+from sqlalchemy import MetaData, create_engine, text
+from sqlalchemy.orm import DeclarativeBase, Session, declared_attr, sessionmaker
+
 from app.core.settings import get_settings
 
 metadata = MetaData(
@@ -30,13 +31,13 @@ class Base(DeclarativeBase):
         return resolve_table_name(cls.__name__)
     
 
-settings = settings()
-engine = create_engine()
+settings = get_settings()
+engine = create_engine(settings.database_url, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(
-    bind = engine, 
-    autoflush= False,
-    autocommit=False, 
+    bind=engine,
+    autoflush=False,
+    autocommit=False,
     expire_on_commit=False,
 )
 
@@ -45,8 +46,8 @@ def init_db() -> None:
     Base.metadata.create_all(bind=engine)
 
 def check_db_connection() -> None: 
-    with SessionLocal() as session: 
-        session.execute(text("SELECT 1")) 
+    with SessionLocal() as session:
+        session.execute(text("SELECT 1"))
 
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
