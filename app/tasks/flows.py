@@ -1,10 +1,13 @@
-from typing import Callable, Generic, TypeVar, Iterable
+from typing import Callable, Generic, TypeVar
 from enum import Enum
 from dataclasses import dataclass, field
 
 S = TypeVar("S", bound=Enum)
 E = TypeVar("E", bound=Enum)
 C = TypeVar("C")
+
+class InvalidTransition(Exception): 
+     pass 
 
 Action = Callable[[C], str]
 
@@ -17,7 +20,10 @@ class StateMachine(Generic[S, E , C]):
                 self.transitions[(from_state, event)] = (to_state, func)
     
     def next_transition(self, state: S, event: E)-> tuple[S, Action[C]]:
-        return self.transitions[(state, event)]
+        try:
+            return self.transitions[(state, event)]
+        except KeyError as error:
+             raise InvalidTransition(f"Cannot apply {event} from {state}") from error
     
     def handle(self, ctx: C, state: S, event: E)-> S:
         next_state, action = self.next_transition(state, event)

@@ -6,7 +6,9 @@ from app.core.pagination import CommonParamsDependency
 from app.database.database import get_db
 from app.tasks.models import TaskCreate, TaskRead, TaskUpdate
 from app.tasks.repo import TaskRepo
+from app.tasks.flows import InvalidTransition
 from app.tasks.service import TaskService
+from app.tasks.models import TaskCreate, TaskRead, TaskUpdate, TaskTransitionRequest
 from sqlalchemy.orm import Session
 
 task_router = APIRouter()
@@ -63,3 +65,19 @@ async def delete_task(task_id: int, service: TaskService = Depends(get_task_serv
             detail="No Task Found."
         )
     return None      
+
+@task_router.post("/{task_id}/transition", response_model=TaskRead)
+async def transition_task(
+    task_id: int, 
+    payload: TaskTransitionRequest, 
+    service: TaskService = Depends(get_task_service),
+):
+    try: 
+        task = service.transition(task_id, payload.event)
+    except InvalidTransition: 
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT)
+    if task is None: 
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Task Not Found.")
+    return task

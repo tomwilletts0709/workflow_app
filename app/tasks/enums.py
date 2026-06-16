@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import StrEnum, auto, Enum
+from enum import StrEnum, auto
 
 from app.tasks.flows import StateMachine
 
@@ -43,7 +43,7 @@ def cancel_task_todo(ctx: TaskCtx) -> str:
 
 @task_state.transition(TaskStatus.IN_PROGRESS, TaskEvent.COMPLETE_TASK, TaskStatus.COMPLETED)
 def complete_task(ctx: TaskCtx) -> str: 
-    return f"Task {ctx.task_id} completted: {ctx.name}"
+    return f"Task {ctx.task_id} completed: {ctx.name}"
 
 @task_state.transition(TaskStatus.IN_PROGRESS, TaskEvent.BLOCK_TASK, TaskStatus.BLOCKED)
 def block_task(ctx: TaskCtx) -> str: 

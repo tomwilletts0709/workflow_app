@@ -15,7 +15,7 @@ class TaskRepoProtocol(Protocol):
     def create(self, name: str, project_id: int | None, type: str, description: str | None) -> Task: 
         ...
 
-    def get_id(self, task_id: int)->Task | None: 
+    def get_id(self, task_id: int)-> Task | None: 
         ...
 
     def get_name(self, name: str) -> Task | None: 

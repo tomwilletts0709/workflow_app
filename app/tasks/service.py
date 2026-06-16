@@ -34,7 +34,7 @@ class TaskService:
     def autocomplete_search(self, query: str | None, limit: int = 10) -> list[str]: 
         return self.repo.autocomplete_search(query, limit)
     
-    def transition(self, task_id: int, event: TaskEvent) -> Task | None: 
+    def transition(self, task_id: int, status: TaskEvent) -> Task | None: 
         task = self.repo.get_id(task_id)
 
         if task is None: 
