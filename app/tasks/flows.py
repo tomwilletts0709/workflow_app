@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Callable, Generic, TypeVar
 from enum import Enum
 from dataclasses import dataclass, field

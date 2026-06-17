@@ -5,10 +5,12 @@ from .rate_limiting import limiter
 import uvicorn
 
 from app.tasks.router import task_router
+from app.core.websockets import websocket_router
 
 app = FastAPI()
 
 app.include_router(task_router, prefix="/tasks")
+app.include_router(websocket_router)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)

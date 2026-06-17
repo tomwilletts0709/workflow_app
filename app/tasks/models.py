@@ -50,3 +50,6 @@ class TaskUpdate(BaseModel):
 class TaskTransitionRequest(BaseModel): 
     event: TaskEvent
 
+
+Task = Tasks
+

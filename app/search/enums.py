@@ -7,7 +7,7 @@ class SearchMode():
     HYBRID = auto()
 
 class SearchEvent(): 
-    "Event" = auto()
+    EVENT = auto()
 
 class SortOrder(): 
     ASC = auto() 
