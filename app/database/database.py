@@ -24,7 +24,7 @@ def resolve_table_name(class_name: str) -> str:
 
 
 class Base(DeclarativeBase): 
-    metadata = metadata 
+    metadata = MetaData 
 
     @declared_attr.directive
     def __tablename__(cls) -> str: 

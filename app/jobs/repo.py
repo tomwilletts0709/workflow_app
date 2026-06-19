@@ -17,19 +17,43 @@ class JobRepo:
         self.db_session.refresh(job)
         return job
     
-    def get(self, job_id: int) -> Job: 
-        return self.db_session.query(Jobs).filter(Jobs.id == job_id).one_or_none()
+    def get(self, job_id: int) -> Job | None: 
+        return self.db_session.query(Jobs).filter(Job.id == job_id).one_or_none()
 
-    def update(self, id: int):
-        job = self.db_session.query(Jobs).filter(Jobs.id == job_id).one_or_none()
+    def get_next_pending(self) -> Job | None:
+        return self.db_session.query(Job).filter(Job.status == JobStatus.PENDING).order_by(Job.create_at).first()
+    
+    def running(self, job_id: int) -> Job | None: 
+        job = self.get(job_id)
+        
+        if job is None: 
+            return None
+        
+        job.status = JobStatus.RUNNING
+        self.db_session.commit()
+        self.db_session.refresh(job)
+        return job
+    
+    def completed(self, job_id: int, result: dict) -> Job | None: 
+        job = self.get(job_id)
 
         if job is None: 
             return None
-
-        self.db_session.commit(job)
-        self.db_session.refresh()
-
-    def delete(self, id: int) -> None: 
+        
+        job.status = JobStatus.COMPLETED
+        self.db_session.commit()
+        self.db_session.refresh(job)
+        return job 
+    
+    def failed(self, job_id: int, error: str) -> Job | None: 
+        job = self.get(job_id)
+        if job is None: 
+            return None
+        
+        job.status = JobStatus.FAILED
+        self.db_session.commit()
+        self.db_session.refresh(job)
+        return job 
 
 
 
