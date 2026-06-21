@@ -30,6 +30,7 @@ dist/
 
 # Local application data
 diary/
+context-gathering/
 *.db
 *.sqlite
 *.sqlite3
