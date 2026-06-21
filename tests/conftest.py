@@ -3,9 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.core.database import Base
-from app.category.models import Category
-from app.items.models import Items
+from app.database.database import Base
+import app.tasks.models  # noqa: F401 - registers task tables with Base.metadata
+
 
 @pytest.fixture()
 def db_session():
