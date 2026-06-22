@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     app_name: str = "Workflow"
     log_level: str = Field(default="WARNING", validation_alias="LOG_LEVEL")
 
+    redis_url: str = Field(default="redis://localhost:6379/", validation_alias="REDIS_URL")
+    celery_broker_url: str = Field(default="redis://localhost:6379/", validation_alias="CELERY_RESULT_BACKEND")
+
 
 @lru_cache()
 def get_settings() -> Settings:

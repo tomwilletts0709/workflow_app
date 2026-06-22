@@ -15,6 +15,11 @@ dependencies = [
     "slowapi>=0.1.9",
     "psycopg[binary]>=3.2.0",
     "alembic>=1.14.0",
+    "celery>=5.4.0",
+    "redis>=7.4.0",
+    "langgraph>=0.2.0",
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",
 ]
 
 [dependency-groups]

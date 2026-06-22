@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 
 from app.jobs.models import Jobs, JobStatus
+from app.jobs.enums import JobType
 
 
 class JobRepo: 
@@ -21,7 +22,7 @@ class JobRepo:
         return self.db_session.query(Jobs).filter(Job.id == job_id).one_or_none()
 
     def get_next_pending(self) -> Job | None:
-        return self.db_session.query(Job).filter(Job.status == JobStatus.PENDING).order_by(Job.create_at).first()
+        return self.db_session.query(Job).filter(Job.status == JobStatus.PENDING).order_by(Job.created_at).first()
     
     def running(self, job_id: int) -> Job | None: 
         job = self.get(job_id)

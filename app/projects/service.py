@@ -10,7 +10,7 @@ class ProjectService:
     def create(self, project_id: int, name: str, description: str | None) -> Projects: 
         return self.repo.create(project_id, name, description)
     
-    def get(self, project_id: int) -> Projects | None:
+    def get_id(self, project_id: int) -> Projects | None:
         return self.repo.get(project_id)
 
     def update(self, project_id: int, name: str) -> Projects: 

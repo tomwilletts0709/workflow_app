@@ -6,4 +6,7 @@ class JobStatus(StrEnum):
     COMPLETED = auto()
     FAILED = auto()
 
+class JobType(StrEnum): 
+    GENERATE_PROJECT_SUMMARY = "generate_project_summary"
 
+    

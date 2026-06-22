@@ -1,23 +1,24 @@
 
 from datetime import datetime, timezone
-from typing import Any
 
 from app.database.database import Base
 from app.tasks.enums import TaskStatus, TaskEvent
 
 from pydantic import BaseModel, Field
-from sqlalchemy import String, Integer, DateTime, Enum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Integer, DateTime, Enum, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 class Tasks(Base): 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
-    project_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    project_id: Mapped[int | None] = mapped_column(ForeignKey("project.id", ondelete="CASCADE"), nullable=True)
     name: Mapped[str] = mapped_column(String, index=True, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     type: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[TaskStatus] = mapped_column(Enum, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    project: Mapped["Project"] = relationship(back_populates="tasks")
 
     def __repr__(self):
         return f"Tasks(id={self.id!r}, name={self.name!r}, status={self.status!r})" 
