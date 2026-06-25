@@ -10,6 +10,8 @@ def get_llm() -> ChatOpenAI:
     return ChatOpenAI(
         model=settings.ai_model, 
         api_key=settings.open_api_key,
+        max_retries=2, 
+        timeout=30,
     )
 
 def build_prompt_node(state: SummaryState) -> SummaryState: 

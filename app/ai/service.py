@@ -3,23 +3,37 @@ from app.ai.graph import run_summary_graph
 
 
 class AIService: 
-    def __init__(self, graph=summary_graph):
-        self.graph = graph
+    def _run_text_graph(self, text: str, style: str) -> SummaryState: 
+        if not text.strip(): 
+            raise ValueError("Cannot run ai on empty text")
+        
+        state = run_summary_graph(text=text, style="concise")
 
-def summarise_text(self, text: str, style: str = "concise") -> SummaryState: 
-    return run_summary_graph(text=text, style=style)
+        if state.get("result"): 
+            raise ValueError("AI Summary Failed.")
+        
+        return state
+    
+    def summarise_project_activity(self, text: str) -> SummaryState: 
+        return self._run_summary_graph(text, style="concise")
+    
+    def summarise_project_activity_bullets(self, text:str) -> SummaryState: 
+        return self._run_summary_graph(text, style="bullets")
+    
+    def summarise_project_activity_detailed(self, text: str) -> SummaryState: 
+        return self._run_summary_graph(text, style="detailed")
 
-def summarise_bullets(self, text:str, style: str="bullets") -> SummaryState: 
-    return run_summary_graph(text=text, style=style)
-
-def detailed_text(self, text: str, style: str="detailed")->SummaryState: 
-    return run_summary_graph(text=text, style=style)
-
-def summarise_text_result(self, text: str, style: str ="concise") -> SummaryState: 
-    state = summarise_text(text=text, style=style)
-    return state["result"]
-
-def summarise_bullet_result(self, text: str, style: str="bullett")-> SummaryState: 
-    state = summarise_bullets(text=text, style=style)
-    return state["result"]
-
+    def detect_project_blockers(self, text:str)-> SummaryState:
+        return self._run_summary_graph(text, "blockers")
+    
+    def summarise_project_activity_result(self, text: str) -> str: 
+        return self.summarise_project_activity(text)["result"]
+    
+    def detect_project_blockers_result(self, text: str)-> str: 
+        return self.detect_project_blockers(text)["result"]
+    
+    def suggest_project_next_steps(self, text: str) -> SummaryState:
+        return self._run_text_graph(text, "next_steps")
+    
+    
+   
