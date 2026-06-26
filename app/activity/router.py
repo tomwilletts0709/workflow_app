@@ -1,4 +1,4 @@
-from fastapo import Depends, APIRouter, Query
+from fastapi import Depends, APIRouter, Query
 from sqlalchemy.orm import Session
 
 from app.activity.models import ActivityRead
@@ -18,7 +18,7 @@ async def list_project(
     project_id: int, 
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    service = ActivityService = Depends(get_activity_service)
+    service: ActivityService = Depends(get_activity_service),
 ):
     return service.list_project(project_id, limit, offset)
 

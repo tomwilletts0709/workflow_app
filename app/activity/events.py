@@ -8,5 +8,5 @@ class ActivityEvent:
     type: ActivityType
     message: str
     task_id: int | None = None
-    metadata: dict[str, Any] = field(default_factory=dict)
+    data: dict[str, Any] = field(default_factory=dict)
 

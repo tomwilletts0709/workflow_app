@@ -1,35 +1,34 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session 
+from sqlalchemy.orm import Session
 
-from app.activity.models import Activty
 from app.activity.events import ActivityEvent
+from app.activity.models import Activity
 
-class ActivityRepo: 
+
+class ActivityRepo:
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-    def create(self, event: ActivityEvent) -> Activity: 
-        activity = Activity(project_id=event.project_id, 
-                            task_id=event.task_id, 
-                            type=event.type, 
-                            message=event.message, 
-                            metadata=event.metadata
-                            )
-        
+    def create(self, event: ActivityEvent) -> Activity:
+        activity = Activity(
+            project_id=event.project_id,
+            task_id=event.task_id,
+            type=event.type,
+            message=event.message,
+            data=event.data,
+        )
+
         self.db_session.add(activity)
         self.db_session.commit()
         self.db_session.refresh(activity)
         return activity
-    
-    def list_project(self, project_id: int, limit: int=50, offset:int=50)->list[Activty]: 
+
+    def list_project(self, project_id: int, limit: int = 50, offset: int = 0) -> list[Activity]:
         statement = (
-            select(Activty)
-            .where(Activty.project_id == project_id)
+            select(Activity)
+            .where(Activity.project_id == project_id)
             .order_by(Activity.created_at.desc())
             .limit(limit)
             .offset(offset)
         )
-        return list(self.db_session.execute(statement)scalars.all())
-    
-    
-
+        return list(self.db_session.execute(statement).scalars().all())
