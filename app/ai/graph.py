@@ -19,7 +19,7 @@ def build_prompt_node(state: SummaryState) -> SummaryState:
     return {
         **state, 
         "prompt": prompt,
-    }
+    } 
 
 def llm_node(state: SummaryState)-> SummaryState: 
     return {
@@ -31,7 +31,7 @@ def build_summary_graph():
     graph = StateGraph(SummaryState)
 
     graph.add_node("build_prompt", build_prompt_node)
-    graph.add_node("llm_node", fake_llm_node)
+    graph.add_node("llm_node", llm_node)
 
     graph.add_edge(START, "build_prompt")
     graph.add_edge("build_prompt", "llm_node")

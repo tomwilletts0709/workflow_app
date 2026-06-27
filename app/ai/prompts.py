@@ -24,7 +24,7 @@ PROMPTS: dict[str, PromptBuilder] = {
     "concise": concise_prompt, 
     "detailed": detailed_prompt, 
     "bullets": bullet_point_prompt,
-    "blockers": blockers,
+    "blockers": blocker_prompt,
     "next_steps": next_steps_prompt,
 }
 
