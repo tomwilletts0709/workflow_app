@@ -1,22 +1,20 @@
 from typing import Any
-from typing import datetime, timezone
 from app.database.database import Base
-
 from app.search.enums import SearchMode
 
 from sqlalchemy import String, Integer, DateTime
-from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import Session, mapped_column, Mapped
 from pydantic import BaseModel, Field
+from datetime import datetime, timezone
 
 
 class Search(Base): 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
 
-class SearchEvent(Base): 
+class SearchEvent(Base):  
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
     query: Mapped[str] = mapped_column(String, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default= lambda: datetine.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default= lambda: datetime.now(timezone.utc))
 
 
 
