@@ -15,5 +15,9 @@ class SearchService:
     
     def global_autocomplete(self, model: type[T], search_columns: list[Any], label_column: Any, query: str, limit: int = 10) -> list[str]:
         pass
-
+    
+    def global_search(self, query: str | None, page: int, page_size: int) -> dict:
+        return self.repo.global_search(query, page, page_size)
+    
+    
         

@@ -14,11 +14,15 @@ def common_params(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
     query: str | None = Query(default=None),
+    sort_by: str | None = None, 
+    sort_order: SortOrder | None = None,
 ) -> CommonParams:
     return CommonParams(
         page=page,
         page_size=page_size,
         query=query,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
 
 

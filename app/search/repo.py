@@ -1,5 +1,6 @@
 from typing import Any, Protocol, TypeVar
 
+from app.search.full_text import FullTextSearch
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
@@ -61,3 +62,35 @@ class SearchRepo:
         )
 
         return list(self.db_session.execute(statement).scalars().all())
+
+    def global_search(self, query: str | None, page: int, page_size: int) -> dict: 
+        results = []
+
+        project_results = self.text_search(Project, [Project.name, Project.description], query, None, 1, 100)
+        task_results = self.text_search(Task, [Task.name, Task.description], query, None, 1, 100)
+        
+        for project in project_results["items"]: 
+            results.append(SearchResult())
+        
+        for task in task_results["items"]: 
+            results.append(SearchResult())
+        
+        total = len(results)
+        offset = (page - 1) * page_size
+
+        return {
+            "results": results[offset:offset + page_size],
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "has_next": offset + page_size < total,
+            "query": query,
+        }
+    
+    def full_text_search(self):
+        statement = select(model)
+        cleaned_query = query.strip() if query else None
+
+        if cleaned_query: 
+            statement = FullTextSearch.appl(statement, search_columns, cleaned_query)
+    

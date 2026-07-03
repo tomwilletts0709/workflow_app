@@ -2,4 +2,7 @@
 
 
 class NotificationService: 
-    async def activity_create(see)
+    async def activity_create():
+        ...
+
+        
