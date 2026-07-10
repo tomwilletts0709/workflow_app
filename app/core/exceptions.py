@@ -1,5 +1,2 @@
-
-from pydantic import PydanticValueError
-
-class AppException():
-    ...
+class AppException(Exception):
+    pass

@@ -3,19 +3,23 @@ from typing import Annotated
 from fastapi import Depends, Query
 from pydantic import BaseModel, Field, model_validator
 
+from app.search.enums import SortOrder
+
 
 class CommonParams(BaseModel):
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=10, ge=1, le=100)
     query: str | None = None
+    sort_by: str | None = None
+    sort_order: SortOrder | None = None
 
 
 def common_params(
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=100),
     query: str | None = Query(default=None),
-    sort_by: str | None = None, 
-    sort_order: SortOrder | None = None,
+    sort_by: str | None = Query(default=None),
+    sort_order: SortOrder | None = Query(default=None),
 ) -> CommonParams:
     return CommonParams(
         page=page,

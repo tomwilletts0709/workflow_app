@@ -5,7 +5,7 @@ from app.database.database import Base
 
 from pydantic import BaseModel, Field
 from sqlalchemy import String, Integer, DateTime, ForeignKey, JSON
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from app.activity.enums import ActivityType
 
 class Activity(Base): 

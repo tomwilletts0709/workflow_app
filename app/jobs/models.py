@@ -47,3 +47,5 @@ class JobRead(BaseModel):
     created_at: datetime
     updated_at: datetime
     completed_at: datetime | None = None
+
+    model_config = {"from_attributes": True}

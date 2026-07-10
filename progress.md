@@ -1,0 +1,1 @@
+- external-evidence research: started; web_search tool unavailable in this subagent environment, using authoritative documentation references from known current project docs URLs.

@@ -1,12 +1,17 @@
+from __future__ import annotations
 
 from datetime import datetime, timezone
-
-from app.database.database import Base
-from app.tasks.enums import TaskStatus, TaskEvent
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, Field
-from sqlalchemy import String, Integer, DateTime, Enum, ForeignKey
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database.database import Base
+from app.tasks.enums import TaskEvent, TaskStatus
+
+if TYPE_CHECKING:
+    from app.projects.models import Project
 
 class Tasks(Base): 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, nullable=False)
@@ -14,7 +19,7 @@ class Tasks(Base):
     name: Mapped[str] = mapped_column(String, index=True, nullable=False)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     type: Mapped[str] = mapped_column(String, nullable=False)
-    status: Mapped[TaskStatus] = mapped_column(Enum, nullable=False)
+    status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 

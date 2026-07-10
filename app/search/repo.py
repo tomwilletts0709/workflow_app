@@ -1,17 +1,37 @@
 from typing import Any, Protocol, TypeVar
 
-from app.search.full_text import FullTextSearch
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
+
+from app.projects.models import Project
+from app.search.enums import SearchType
+from app.search.full_text import FullTextSearch
+from app.search.models import SearchResult
+from app.tasks.models import Task
 
 T = TypeVar("T")
 
 
 class SearchRepoProtocol(Protocol):
-    def autocomplete(self, model: type[T], search_columns: list[Any], label_column: Any, query: str, limit: int = 10) -> list[str]:
+    def autocomplete(
+        self,
+        model: type[T],
+        search_columns: list[Any],
+        label_column: Any,
+        query: str,
+        limit: int = 10,
+    ) -> list[str]:
         ...
 
-    def text_search(self, model: type[T], search_columns: list[Any], query: str | None, filters: dict | None, page: int, page_size: int) -> dict[str, Any]:
+    def text_search(
+        self,
+        model: type[T],
+        search_columns: list[Any],
+        query: str | None,
+        filters: dict | None,
+        page: int,
+        page_size: int,
+    ) -> dict[str, Any]:
         ...
 
 
@@ -19,7 +39,15 @@ class SearchRepo:
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-    def text_search(self, model: type[T], search_columns: list[Any], query: str | None, filters: dict | None, page: int, page_size: int) -> dict[str, Any]:
+    def text_search(
+        self,
+        model: type[T],
+        search_columns: list[Any],
+        query: str | None,
+        filters: dict | None,
+        page: int,
+        page_size: int,
+    ) -> dict[str, Any]:
         statement = select(model)
         cleaned_query = query.strip() if query else None
 
@@ -47,7 +75,14 @@ class SearchRepo:
             "has_next": offset + page_size < total,
         }
 
-    def autocomplete(self, model: type[T], search_columns: list[Any], label_column: Any, query: str, limit: int = 10) -> list[str]:
+    def autocomplete(
+        self,
+        model: type[T],
+        search_columns: list[Any],
+        label_column: Any,
+        query: str,
+        limit: int = 10,
+    ) -> list[str]:
         cleaned_query = query.strip()
 
         if not cleaned_query:
@@ -63,34 +98,91 @@ class SearchRepo:
 
         return list(self.db_session.execute(statement).scalars().all())
 
-    def global_search(self, query: str | None, page: int, page_size: int) -> dict: 
-        results = []
+    def global_search(self, query: str | None, page: int, page_size: int) -> dict[str, Any]:
+        project_results = self.text_search(
+            Project,
+            [Project.name, Project.description],
+            query,
+            None,
+            1,
+            100,
+        )
+        task_results = self.text_search(
+            Task,
+            [Task.name, Task.description],
+            query,
+            None,
+            1,
+            100,
+        )
 
-        project_results = self.text_search(Project, [Project.name, Project.description], query, None, 1, 100)
-        task_results = self.text_search(Task, [Task.name, Task.description], query, None, 1, 100)
-        
-        for project in project_results["items"]: 
-            results.append(SearchResult())
-        
-        for task in task_results["items"]: 
-            results.append(SearchResult())
-        
+        results: list[SearchResult] = []
+        for project in project_results["items"]:
+            results.append(
+                SearchResult(
+                    type=SearchType.PROJECT,
+                    id=project.id,
+                    title=project.name,
+                    description=project.description,
+                    created_at=project.created_at,
+                    data={"status": project.status.value},
+                )
+            )
+
+        for task in task_results["items"]:
+            results.append(
+                SearchResult(
+                    type=SearchType.TASK,
+                    id=task.id,
+                    title=task.name,
+                    description=task.description,
+                    created_at=task.created_at,
+                    data={
+                        "status": task.status.value,
+                        "project_id": task.project_id,
+                    },
+                )
+            )
+
         total = len(results)
         offset = (page - 1) * page_size
 
         return {
-            "results": results[offset:offset + page_size],
+            "result": results[offset : offset + page_size],
             "page": page,
             "page_size": page_size,
             "total": total,
             "has_next": offset + page_size < total,
             "query": query,
         }
-    
-    def full_text_search(self):
+
+    def full_text_search(
+        self,
+        model: type[T],
+        search_columns: list[Any],
+        query: str | None,
+        page: int,
+        page_size: int,
+    ) -> dict[str, Any]:
         statement = select(model)
         cleaned_query = query.strip() if query else None
 
-        if cleaned_query: 
-            statement = FullTextSearch.appl(statement, search_columns, cleaned_query)
-    
+        if cleaned_query:
+            statement = FullTextSearch().apply(statement, search_columns, cleaned_query)
+
+        total_statement = select(func.count()).select_from(statement.subquery())
+        total = self.db_session.execute(total_statement).scalar_one()
+        offset = (page - 1) * page_size
+        rows = (
+            self.db_session.execute(statement.offset(offset).limit(page_size))
+            .scalars()
+            .all()
+        )
+
+        return {
+            "items": rows,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+            "has_next": offset + page_size < total,
+        }

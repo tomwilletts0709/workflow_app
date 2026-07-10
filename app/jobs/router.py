@@ -27,7 +27,7 @@ async def get_job(
 ): 
     job = service.get(job_id)
     if job is None: 
-        return HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail="Job Not Found."
         )

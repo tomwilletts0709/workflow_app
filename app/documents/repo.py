@@ -1,49 +1,47 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.documents.enums import DocumentType
 from app.documents.models import Document
 
-from sqlalchemy.orm import Session
-from sqlalchemy import select
 
-
-
-class DocumentRepo: 
+class DocumentRepo:
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-        def create(self, title: str) -> Document:
-            document = Document(title=title)
-            self.db_session.add(document)
-            self.db_session.commit()
-            self.db_session.refresh(document)
-            return document
-        
-        def update(self, document_id: int, title: str) -> Document | None: 
-            statement = select(Document).where(Document.id == document_id)
-            document = self.db_session.execute(statement).scalar_one_or_none()
+    def create(self, type: DocumentType, title: str) -> Document:
+        document = Document(type=type, title=title)
+        self.db_session.add(document)
+        self.db_session.commit()
+        self.db_session.refresh(document)
+        return document
 
-            if document is None: 
-                return None
-            
-            if title is not None: 
-                document.title = title
-            
-            self.db_session.commit()
-            self.db_session.refresh(document)
-            return document
-        
-        def delete(self, document_id: int) -> bool: 
-            document = self.db_session.query(document).filter(Document.id == document_id).one_or_none()
+    def update(self, document_id: int, title: str | None) -> Document | None:
+        statement = select(Document).where(Document.id == document_id)
+        document = self.db_session.execute(statement).scalar_one_or_none()
 
-            if document is None: 
-                return False
+        if document is None:
+            return None
 
-            self.db_session.delete(document)
-            self.db_session.commit()
-            return True
+        if title is not None:
+            document.title = title
 
-        def get_document_id(self, document_id: int) -> Document | None: 
-            return self.db_session.query(Document).filter(Document.id == document_id).one_or_none()
-        
-        def list_all(self) -> list[Document]:
-            return self.db_session.query(Document).all()
-        
-        
+        self.db_session.commit()
+        self.db_session.refresh(document)
+        return document
+
+    def delete(self, document_id: int) -> bool:
+        document = self.db_session.query(Document).filter(Document.id == document_id).one_or_none()
+
+        if document is None:
+            return False
+
+        self.db_session.delete(document)
+        self.db_session.commit()
+        return True
+
+    def get_document_id(self, document_id: int) -> Document | None:
+        return self.db_session.query(Document).filter(Document.id == document_id).one_or_none()
+
+    def list_all(self) -> list[Document]:
+        return self.db_session.query(Document).all()

@@ -1,6 +1,5 @@
-from enums import StrEnum
+from enum import StrEnum
 
 
 class WorkflowEnum(StrEnum):
-
-    pass 
+    pass

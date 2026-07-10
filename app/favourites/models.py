@@ -2,7 +2,7 @@
 
 from app.database.database import Base
 
-from sqlalchemy import String, Integer, Enum
+from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 from pydantic import BaseModel
 
