@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.pagination import CommonParamsDependency, PaginatedResponse
+
 from app.database.database import get_db
 from app.projects.models import ProjectCreate, ProjectRead, ProjectUpdate
 from app.projects.repo import ProjectRepo
@@ -26,8 +28,8 @@ async def create_project(
     )
 
 
-@project_router.get("", response_model=list[ProjectRead])
-async def list_projects(service: ProjectService = Depends(get_project_service)):
+@project_router.get("", response_model=PaginatedResponse[ProjectRead])
+async def list_projects(params: CommonParamsDependency, service: ProjectService = Depends(get_project_service)):
     return service.list_all()
 
 

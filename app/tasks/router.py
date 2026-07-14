@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.pagination import CommonParamsDependency
+from app.core.pagination import CommonParamsDependency, PaginatedResponse
 from app.database.database import get_db
 from app.tasks.flows import InvalidTransition
 from app.tasks.models import TaskCreate, TaskRead, TaskTransitionRequest, TaskUpdate
@@ -40,7 +40,7 @@ async def get_task(task_id: int, service: TaskService = Depends(get_task_service
     return task
 
 
-@task_router.get("")
+@task_router.get("", response_mode=PaginatedResponse[TaskRead])
 async def list_tasks(
     params: CommonParamsDependency,
     service: TaskService = Depends(get_task_service),
