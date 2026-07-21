@@ -32,4 +32,3 @@ class FullTextSearch:
             statement = statement.order_by(self.rank(vector, query).desc())
 
         return statement
-    

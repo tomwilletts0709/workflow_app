@@ -30,7 +30,11 @@ async def create_project(
 
 @project_router.get("", response_model=PaginatedResponse[ProjectRead])
 async def list_projects(params: CommonParamsDependency, service: ProjectService = Depends(get_project_service)):
-    return service.list_all()
+    return service.list_paginated(
+        query=params.query, 
+        page=params.page, 
+        page_size=params.page_size,
+    )
 
 
 @project_router.get("/{project_id}", response_model=ProjectRead)
@@ -45,7 +49,7 @@ async def get_project(
             detail="Project Not Found",
         )
     return project
-
+    
 
 @project_router.patch("/{project_id}", response_model=ProjectRead)
 async def update_project(

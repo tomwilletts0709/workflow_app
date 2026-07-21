@@ -1,10 +1,18 @@
-from typing import Annotated
+from typing import Annotated, Generic, TypeVar
 
 from fastapi import Depends, Query
 from pydantic import BaseModel, Field, model_validator
 
 from app.search.enums import SortOrder
 
+T = TypeVar("T")
+
+class PaginatedResponse(BaseModel, Generic[T]): 
+    items: list[T]
+    page: int = Field(ge=1)
+    page_size: int = Field(ge=1, le=100)
+    total: int = Field(ge=0)
+    has_next= bool
 
 class CommonParams(BaseModel):
     page: int = Field(default=1, ge=1)

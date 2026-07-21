@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from sqlalchemy import select
+from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
 
 from app.core.logging import logging
@@ -26,6 +26,9 @@ class ProjectRepoProtocol(Protocol):
         ...
 
     def list_all(self) -> list[Project]:
+        ...
+
+    def list_paginated(self, query: str | None, page: int, page_size: int) -> dict: 
         ...
 
 
@@ -74,3 +77,27 @@ class ProjectRepo:
 
     def list_all(self) -> list[Project]:
         return self.db_session.query(Project).all()
+    
+    def list_paginated(self, query: str | None, page: int, page_size: int) -> dict: 
+        statement = select(Project)
+
+        cleaned_query = query.strip() if query else None
+        if cleaned_query: 
+            pattern = f"%{cleaned_query}%"
+            statement = statement.where(
+                or_(
+                    Project.name.ilike(pattern),
+                    Project.description.ilike(pattern)
+                )
+            )
+        total_statement = select(func.count()).select_from(statement.subquery())
+        total = self.db_session.execute(total_statement).scalar_one()
+
+        offset = (page - 1) * page_size
+        rows = (
+            self.db_session.execute(statement.offset(offset).limit(page_size))
+            .scalars()
+            .all()
+        )
+
+        

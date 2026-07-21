@@ -22,3 +22,8 @@ class ProjectService:
 
     def list_all(self) -> list[Project]:
         return self.repo.list_all()
+    
+    def list_paginated(self, query: str | None, page: int, page_size: int) -> dict: 
+        return self.repo.list_paginated(query, page, page_size)
+    
+    
