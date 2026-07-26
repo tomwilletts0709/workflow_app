@@ -16,6 +16,7 @@ class Favourites(Base):
 class FavouritesRead(BaseModel):
     id: int
     
+    
 
 class FavouritesCreate(BaseModel): 
     name: str

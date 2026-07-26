@@ -6,7 +6,7 @@ from app.tasks.enums import TaskCtx, TaskEvent, task_state
 
 
 class TaskService: 
-    def __init__(self, repo:TaskRepo, ): 
+    def __init__(self, repo:TaskRepo): 
         self.repo = repo
 
     def create(self, name: str, project_id: int | None,  type: str, description: str | None) -> Task: 
